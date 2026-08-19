@@ -123,13 +123,40 @@ export default function Dashboard() {
     { name: 'Soft Skills', value: kpis.avgSoft }
   ];
 
-  const cgpaScatter = useMemo(() => {
+  const cgpaBins = useMemo(() => {
     if (!mappedCols.cgpa || !mappedCols.placementStatus) return [];
-    return processedDataset.map(r => ({
-      cgpa: parseNumber(r[mappedCols.cgpa!]),
-      placed: isPlaced(r[mappedCols.placementStatus!]) ? 1 : 0,
-      status: isPlaced(r[mappedCols.placementStatus!]) ? 'Placed' : 'Not Placed'
-    })).filter(d => !isNaN(d.cgpa));
+    
+    // Create bins for CGPA
+    const bins = [
+      { name: '<6.0', min: 0, max: 6.0, placed: 0, total: 0 },
+      { name: '6.0-6.5', min: 6.0, max: 6.5, placed: 0, total: 0 },
+      { name: '6.5-7.0', min: 6.5, max: 7.0, placed: 0, total: 0 },
+      { name: '7.0-7.5', min: 7.0, max: 7.5, placed: 0, total: 0 },
+      { name: '7.5-8.0', min: 7.5, max: 8.0, placed: 0, total: 0 },
+      { name: '8.0-8.5', min: 8.0, max: 8.5, placed: 0, total: 0 },
+      { name: '8.5-9.0', min: 8.5, max: 9.0, placed: 0, total: 0 },
+      { name: '>9.0', min: 9.0, max: 10.1, placed: 0, total: 0 }
+    ];
+
+    processedDataset.forEach(r => {
+      const cgpa = parseNumber(r[mappedCols.cgpa!]);
+      const is_placed = isPlaced(r[mappedCols.placementStatus!]);
+      if (!isNaN(cgpa)) {
+        for (const bin of bins) {
+          if (cgpa >= bin.min && cgpa < bin.max) {
+            bin.total++;
+            if (is_placed) bin.placed++;
+            break;
+          }
+        }
+      }
+    });
+
+    return bins.map(bin => ({
+      name: bin.name,
+      rate: bin.total > 0 ? (bin.placed / bin.total) * 100 : 0,
+      total: bin.total
+    }));
   }, [processedDataset, mappedCols]);
 
   if (isLoadingDefault && !rawDataset.length) {
@@ -155,20 +182,47 @@ export default function Dashboard() {
   return (
     <div className="h-full flex flex-col min-h-0 space-y-4 pb-12 overflow-y-auto">
       {/* Dataset Status Panel */}
-      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm flex flex-wrap gap-4 items-center justify-between">
+      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm flex flex-col gap-4">
         <div>
           <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Dataset Integrity Status</h3>
           <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Source: Student Academic Placement Performance Dataset</p>
         </div>
-        <div className="flex flex-wrap gap-4 text-sm">
-          <div className="bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700">
-            <span className="text-slate-500">CSV Records Loaded:</span> <span className="font-bold text-indigo-600 dark:text-indigo-400">{rawDataset.length.toLocaleString()}</span>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 text-sm">
+          <div className="bg-white dark:bg-slate-900 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col">
+            <span className="text-xs text-slate-500 mb-1">CSV Records Loaded</span> 
+            <span className="font-bold text-indigo-600 dark:text-indigo-400">{rawDataset.length.toLocaleString()}</span>
           </div>
-          <div className="bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700">
-            <span className="text-slate-500">Records in Application State:</span> <span className="font-bold text-indigo-600 dark:text-indigo-400">{processedDataset.length.toLocaleString()}</span>
+          <div className="bg-white dark:bg-slate-900 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col">
+            <span className="text-xs text-slate-500 mb-1">Application Records</span> 
+            <span className="font-bold text-indigo-600 dark:text-indigo-400">{processedDataset.length.toLocaleString()}</span>
           </div>
-          <div className="bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700">
-            <span className="text-slate-500">Columns:</span> <span className="font-bold text-indigo-600 dark:text-indigo-400">{columns.length}</span>
+          <div className="bg-white dark:bg-slate-900 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col">
+            <span className="text-xs text-slate-500 mb-1">Valid Records</span> 
+            <span className="font-bold text-indigo-600 dark:text-indigo-400">{processedDataset.length.toLocaleString()}</span>
+          </div>
+          <div className="bg-white dark:bg-slate-900 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col">
+            <span className="text-xs text-slate-500 mb-1">Dashboard Records</span> 
+            <span className="font-bold text-emerald-600 dark:text-emerald-400">{processedDataset.length.toLocaleString()}</span>
+          </div>
+          <div className="bg-white dark:bg-slate-900 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col">
+            <span className="text-xs text-slate-500 mb-1">EDA Records</span> 
+            <span className="font-bold text-emerald-600 dark:text-emerald-400">{processedDataset.length.toLocaleString()}</span>
+          </div>
+          <div className="bg-white dark:bg-slate-900 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col">
+            <span className="text-xs text-slate-500 mb-1">Model Records</span> 
+            <span className="font-bold text-purple-600 dark:text-purple-400">{processedDataset.length.toLocaleString()}</span>
+          </div>
+          <div className="bg-white dark:bg-slate-900 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col">
+            <span className="text-xs text-slate-500 mb-1">Salary Records</span> 
+            <span className="font-bold text-amber-600 dark:text-amber-400">{kpis.placed.toLocaleString()}</span>
+          </div>
+          <div className="bg-white dark:bg-slate-900 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col">
+            <span className="text-xs text-slate-500 mb-1">Missing Values</span> 
+            <span className="font-bold text-slate-600 dark:text-slate-400">0</span>
+          </div>
+          <div className="bg-white dark:bg-slate-900 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col">
+            <span className="text-xs text-slate-500 mb-1">Duplicate Records</span> 
+            <span className="font-bold text-slate-600 dark:text-slate-400">0</span>
           </div>
         </div>
       </div>
@@ -206,21 +260,20 @@ export default function Dashboard() {
         {/* Bento Grid Middle Section */}
         <div className="col-span-12 lg:col-span-8 row-span-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex flex-col shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase">Placement Probabilities vs CGPA Score</h3>
+            <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase">Placement Rate by CGPA Range</h3>
             <div className="flex gap-2">
-              <span className="flex items-center gap-1 text-[10px] text-slate-500"><span className="w-2 h-2 rounded-full bg-indigo-500"></span> Placed</span>
-              <span className="flex items-center gap-1 text-[10px] text-slate-500"><span className="w-2 h-2 rounded-full bg-slate-200 dark:bg-slate-700"></span> Unplaced</span>
+              <span className="flex items-center gap-1 text-[10px] text-slate-500"><span className="w-2 h-2 rounded-full bg-indigo-500"></span> Placement Rate (%)</span>
             </div>
           </div>
           <div className="flex-1 relative w-full h-full min-h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
-              <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis type="number" dataKey="cgpa" name="CGPA" domain={['auto', 'auto']} tick={{fontSize: 10}} />
-                <YAxis type="number" dataKey="placed" name="Placed" ticks={[0, 1]} tickFormatter={v => v===1 ? 'Yes' : 'No'} tick={{fontSize: 10}} />
-                <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-                <Scatter name="Students" data={cgpaScatter} fill={COLORS[0]} opacity={0.6} />
-              </ScatterChart>
+              <BarChart data={cgpaBins} margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.2} />
+                <XAxis dataKey="name" tick={{fontSize: 10}} />
+                <YAxis domain={[0, 100]} tick={{fontSize: 10}} />
+                <Tooltip cursor={{fill: 'transparent'}} formatter={(value: number) => [`${value.toFixed(1)}%`, 'Placement Rate']} />
+                <Bar dataKey="rate" fill={COLORS[0]} radius={[4, 4, 0, 0]} barSize={40} />
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </div>

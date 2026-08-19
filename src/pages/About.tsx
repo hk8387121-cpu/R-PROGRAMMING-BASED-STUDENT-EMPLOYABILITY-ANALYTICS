@@ -144,50 +144,55 @@ export default function About() {
           <div className="space-y-6">
             <div className="bg-slate-900 text-slate-200 rounded-xl overflow-hidden border border-slate-800">
               <div className="bg-slate-950 px-4 py-2 text-xs text-slate-400 border-b border-slate-800 font-mono">1_data_preprocessing.R</div>
-              <pre className="p-4 text-sm overflow-x-auto"><code className="language-r">{`# Load dataset
-data <- read.csv("student_academic_placement_performance_dataset.csv")
+              <pre className="p-4 text-sm overflow-x-auto"><code className="language-r">{`library(readr)
+library(dplyr)
+
+data <- read_csv("student_academic_placement_performance_dataset(1).csv")
 
 # Dataset information
 dim(data)
 str(data)
 summary(data)
 
-# Placement distribution
-table(data$Placement_Status)
+colSums(is.na(data))
 
 # Average CGPA
-mean(data$CGPA, na.rm = TRUE)
+mean(data$cgpa, na.rm = TRUE)
 
 # Average technical skill
-mean(data$Technical_Skill_Score, na.rm = TRUE)
+mean(data$technical_skill_score, na.rm = TRUE)
+
+# Average soft skill
+mean(data$soft_skill_score, na.rm = TRUE)
 
 # Placement rate
-placement_rate <- mean(data$Placement_Status == "Placed",
-                       na.rm = TRUE) * 100`}</code></pre>
+placement_rate <- mean(data$placement_status == 1, na.rm = TRUE) * 100
+placement_rate`}</code></pre>
             </div>
 
             <div className="bg-slate-900 text-slate-200 rounded-xl overflow-hidden border border-slate-800">
               <div className="bg-slate-950 px-4 py-2 text-xs text-slate-400 border-b border-slate-800 font-mono">2_visualization.R</div>
               <pre className="p-4 text-sm overflow-x-auto"><code className="language-r">{`library(ggplot2)
 
-ggplot(data, aes(x = CGPA, fill = Placement_Status)) +
+ggplot(data, aes(x = cgpa, fill = as.factor(placement_status))) +
   geom_histogram(bins = 20) +
   labs(
     title = "CGPA Distribution by Placement Status",
     x = "CGPA",
-    y = "Number of Students"
+    y = "Number of Students",
+    fill = "Placement Status"
   )`}</code></pre>
             </div>
 
             <div className="bg-slate-900 text-slate-200 rounded-xl overflow-hidden border border-slate-800">
               <div className="bg-slate-950 px-4 py-2 text-xs text-slate-400 border-b border-slate-800 font-mono">3_regression_analysis.R</div>
               <pre className="p-4 text-sm overflow-x-auto"><code className="language-r">{`model <- lm(
-  Salary_Package ~ CGPA +
-  Technical_Skill_Score +
-  Soft_Skill_Score +
-  Internship_Count +
-  Work_Experience,
-  data = data
+  salary_package_lpa ~ cgpa +
+  technical_skill_score +
+  soft_skill_score +
+  internship_count +
+  work_experience_months,
+  data = subset(data, placement_status == 1 & salary_package_lpa > 0)
 )
 
 summary(model)`}</code></pre>
