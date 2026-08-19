@@ -86,7 +86,7 @@ export default function StudentAnalysis() {
           </div>
 
           <div className="w-full md:w-80 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm flex flex-col justify-center items-center text-center">
-            <h4 className="text-slate-500 font-medium mb-4">Employability Score</h4>
+            <h4 className="text-slate-500 font-medium mb-4">Rule-Based Employability Score</h4>
             <div className="relative inline-flex items-center justify-center w-40 h-40 mb-4">
               <svg className="w-full h-full transform -rotate-90">
                 <circle cx="80" cy="80" r="72" className="text-slate-100 dark:text-slate-800" strokeWidth="16" fill="none" stroke="currentColor" />
@@ -103,6 +103,9 @@ export default function StudentAnalysis() {
                 <span className="text-xs text-slate-400">/ 100</span>
               </div>
             </div>
+            <p className="text-[10px] text-slate-400 mt-2 px-4 leading-tight">
+              * Note: This is a composite analytical score, NOT a machine-learning placement probability.
+            </p>
           </div>
         </div>
 

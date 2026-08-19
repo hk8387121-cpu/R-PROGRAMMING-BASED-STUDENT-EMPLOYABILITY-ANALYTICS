@@ -25,7 +25,8 @@ export default function Prediction() {
     workExperience: 0,
     certifications: 1,
     attendance: 80,
-    backlogs: 0
+    backlogs: 0,
+    extracurricular: 1
   });
 
   const [prediction, setPrediction] = useState<{prob: number, status: number} | null>(null);
@@ -40,6 +41,9 @@ export default function Prediction() {
     processedDataset.forEach(row => {
       const placed = isPlaced(row[mappedCols.placementStatus!]) ? 1 : 0;
       
+      const extracurricular = String(row[mappedCols.extracurricularActivities || '']).toLowerCase() === 'yes' || 
+                              parseNumber(row[mappedCols.extracurricularActivities || '']) === 1 ? 1 : 0;
+      
       const features = [
         parseNumber(row[mappedCols.ssc || '']),
         parseNumber(row[mappedCols.hsc || '']),
@@ -53,7 +57,8 @@ export default function Prediction() {
         parseNumber(row[mappedCols.workExperience || '']),
         parseNumber(row[mappedCols.certifications || '']),
         parseNumber(row[mappedCols.attendance || '']),
-        parseNumber(row[mappedCols.backlogs || ''])
+        parseNumber(row[mappedCols.backlogs || '']),
+        extracurricular
       ];
 
       if (features.every(f => !isNaN(f))) {
@@ -118,7 +123,8 @@ export default function Prediction() {
     const inputFeatures = [
       formData.ssc, formData.hsc, formData.degree, formData.cgpa, formData.entranceExam,
       formData.technicalSkill, formData.softSkill, formData.internships, formData.liveProjects,
-      formData.workExperience, formData.certifications, formData.attendance, formData.backlogs
+      formData.workExperience, formData.certifications, formData.attendance, formData.backlogs,
+      formData.extracurricular
     ];
 
     const scaledFeatures = transformWithScaler(inputFeatures, scaler.means, scaler.stds);
@@ -171,6 +177,18 @@ export default function Prediction() {
               <InputField label="Certifications" name="certifications" value={formData.certifications} onChange={handleChange} min={0} max={20} />
               <InputField label="Attendance %" name="attendance" value={formData.attendance} onChange={handleChange} min={0} max={100} />
               <InputField label="Backlogs" name="backlogs" value={formData.backlogs} onChange={handleChange} min={0} max={10} />
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Extracurricular Activities</label>
+                <select 
+                  name="extracurricular" 
+                  value={formData.extracurricular} 
+                  onChange={(e) => setFormData(prev => ({ ...prev, extracurricular: Number(e.target.value) }))}
+                  className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                >
+                  <option value={1}>Yes</option>
+                  <option value={0}>No</option>
+                </select>
+              </div>
             </div>
 
             <button 
@@ -211,6 +229,39 @@ export default function Prediction() {
                   }`}>
                     {prediction.status === 1 ? <CheckCircle2 className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
                     {prediction.status === 1 ? 'LIKELY TO BE PLACED' : 'UNLIKELY TO BE PLACED'}
+                  </div>
+                </div>
+                
+                <div className="text-left mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+                  <div className="mb-4">
+                    <span className="text-xs font-bold text-slate-500 uppercase">Model Used:</span>
+                    <span className="ml-2 text-sm font-medium">Logistic Regression (R-based equivalent)</span>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase flex items-center gap-1 mb-1"><CheckCircle2 className="w-3 h-3"/> Positive Factors</span>
+                      <ul className="text-xs text-slate-600 dark:text-slate-400 list-disc list-inside">
+                        {parseFloat(formData.cgpa) >= 7.5 && <li>Strong CGPA ({formData.cgpa})</li>}
+                        {parseInt(formData.internships) >= 2 && <li>Multiple Internships ({formData.internships})</li>}
+                        {parseInt(formData.technicalSkill) >= 75 && <li>High Technical Skill ({formData.technicalSkill}%)</li>}
+                        {parseInt(formData.softSkill) >= 80 && <li>Excellent Soft Skills ({formData.softSkill}%)</li>}
+                        {parseInt(formData.backlogs) === 0 && <li>No Academic Backlogs</li>}
+                        {parseFloat(formData.cgpa) < 7.5 && parseInt(formData.internships) < 2 && parseInt(formData.technicalSkill) < 75 && parseInt(formData.backlogs) > 0 && <li>None detected in current profile.</li>}
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <span className="text-xs font-bold text-red-600 dark:text-red-400 uppercase flex items-center gap-1 mb-1"><XCircle className="w-3 h-3"/> Risk Factors</span>
+                      <ul className="text-xs text-slate-600 dark:text-slate-400 list-disc list-inside">
+                        {parseFloat(formData.cgpa) < 7.0 && <li>Low CGPA ({formData.cgpa})</li>}
+                        {parseInt(formData.backlogs) > 0 && <li>Active Backlogs ({formData.backlogs})</li>}
+                        {parseInt(formData.technicalSkill) < 60 && <li>Low Technical Skill ({formData.technicalSkill}%)</li>}
+                        {parseInt(formData.internships) === 0 && <li>No Internship Experience</li>}
+                        {parseInt(formData.attendance) < 75 && <li>Low Attendance ({formData.attendance}%)</li>}
+                        {parseFloat(formData.cgpa) >= 7.0 && parseInt(formData.backlogs) === 0 && parseInt(formData.technicalSkill) >= 60 && parseInt(formData.internships) > 0 && parseInt(formData.attendance) >= 75 && <li>No major risk factors detected.</li>}
+                      </ul>
+                    </div>
                   </div>
                 </div>
               </div>

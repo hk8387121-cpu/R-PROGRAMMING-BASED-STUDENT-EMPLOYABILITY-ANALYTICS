@@ -33,14 +33,28 @@ actuals <- dataTest$salary_package_lpa
 rss <- sum((predictions - actuals) ^ 2)
 tss <- sum((actuals - mean(actuals)) ^ 2)
 rsq <- 1 - rss/tss
+
+# Adjusted R-squared
+n <- nrow(dataTest)
+p <- length(lm_model$coefficients) - 1 # number of predictors
+adj_rsq <- 1 - ((1 - rsq) * (n - 1) / (n - p - 1))
+
 mae <- mean(abs(predictions - actuals))
 mse <- mean((predictions - actuals)^2)
 rmse <- sqrt(mse)
 
 cat("--- Salary Regression Evaluation ---\n")
 cat("R-squared:", rsq, "\n")
+cat("Adjusted R-squared:", adj_rsq, "\n")
 cat("MAE:", mae, "\n")
 cat("MSE:", mse, "\n")
 cat("RMSE:", rmse, "\n")
 
-saveRDS(lm_model, "../results/models/linear_regression_salary.rds")
+# Save metrics
+metrics_df <- data.frame(
+  Metric = c("R_Squared", "Adjusted_R_Squared", "MAE", "MSE", "RMSE"),
+  Value = c(rsq, adj_rsq, mae, mse, rmse)
+)
+write_csv(metrics_df, "../results/tables/salary_regression_metrics.csv")
+
+saveRDS(lm_model, "../results/models/salary_regression_model.rds")

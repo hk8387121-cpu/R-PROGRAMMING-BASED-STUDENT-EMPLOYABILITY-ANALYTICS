@@ -217,7 +217,7 @@ export default function SalaryAnalysis() {
               <div>
                 <div className="text-4xl font-extrabold my-2">{prediction.toFixed(2)}</div>
                 <div className="text-emerald-100 font-medium">Lakhs Per Annum (LPA)</div>
-                <p className="text-xs text-emerald-200 mt-4 opacity-80">This is a statistical estimate based on historical placement data.</p>
+                <p className="text-xs text-emerald-200 mt-4 opacity-80">Estimated statistical prediction — not a guaranteed salary.</p>
               </div>
             ) : (
               <div className="py-6 flex flex-col items-center opacity-70">

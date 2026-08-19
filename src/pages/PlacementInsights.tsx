@@ -88,11 +88,12 @@ export default function PlacementInsights() {
       </div>
 
       <div className="bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 rounded-xl p-6 shadow-sm">
-        <h3 className="text-lg font-bold text-indigo-900 dark:text-indigo-300 mb-4">Most Influential Factors</h3>
-        <p className="text-slate-700 dark:text-slate-300 mb-4 text-sm">
-          Based on the data, higher CGPA, more internships, and stronger technical skills are associated with higher placement rates. 
-          Conversely, a higher number of backlogs is associated with lower placement rates. 
-          <em>Note: Correlation does not imply causation.</em>
+        <h3 className="text-lg font-bold text-indigo-900 dark:text-indigo-300 mb-4">Key Statistical Associations</h3>
+        <p className="text-slate-700 dark:text-slate-300 mb-4 text-sm leading-relaxed">
+          The statistical analysis presented in the charts above is calculated directly from the {processedDataset.length.toLocaleString()} records in the complete dataset. It reveals the varying magnitudes of difference between Placed and Not Placed cohorts across academic, skill, and experience metrics.
+        </p>
+        <p className="text-slate-700 dark:text-slate-300 mb-4 text-sm font-medium">
+          <em>* Note: Statistical association does not necessarily imply causation. These insights should be evaluated alongside the predictive modeling results for comprehensive interpretation.</em>
         </p>
       </div>
     </div>

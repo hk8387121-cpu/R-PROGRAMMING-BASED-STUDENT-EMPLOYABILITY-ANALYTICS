@@ -60,37 +60,53 @@ export default function About() {
 
         <section>
           <h3 className="text-xl font-bold mb-4 text-indigo-900 dark:text-indigo-300 flex items-center gap-2">
-            <Monitor className="w-5 h-5" /> Project Technology
+            <Monitor className="w-5 h-5" /> Technology Used
           </h3>
           <p className="text-slate-700 dark:text-slate-300 leading-relaxed mb-6 font-medium">
             R Programming is used for data preprocessing, exploratory data analysis, statistical analysis, visualization, regression analysis and placement prediction. The web dashboard is used to present the results interactively.
           </p>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-slate-50 dark:bg-slate-800 p-5 rounded-lg border border-slate-100 dark:border-slate-700">
-              <h4 className="font-bold mb-3 text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700 pb-2">Core Platform</h4>
-              <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                <li><strong className="text-slate-700 dark:text-slate-300">Primary Programming Language:</strong> R Programming</li>
-                <li><strong className="text-slate-700 dark:text-slate-300">Development Environment:</strong> RStudio</li>
-                <li><strong className="text-slate-700 dark:text-slate-300">Dataset:</strong> Student Academic Placement Performance Dataset (CSV)</li>
-                <li><strong className="text-slate-700 dark:text-slate-300">Dashboard:</strong> Google AI Studio / React-based interface</li>
-              </ul>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div className="bg-slate-50 dark:bg-slate-800 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+              <h4 className="font-bold text-slate-800 dark:text-slate-200 p-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">HARDWARE</h4>
+              <table className="w-full text-sm text-left text-slate-600 dark:text-slate-400">
+                <thead className="bg-slate-100 dark:bg-slate-800/50">
+                  <tr>
+                    <th className="px-4 py-3 font-semibold">Component</th>
+                    <th className="px-4 py-3 font-semibold">Specification</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+                  <tr><td className="px-4 py-2 font-medium text-slate-800 dark:text-slate-200">Processor</td><td className="px-4 py-2">AMD Ryzen 5 7520U</td></tr>
+                  <tr><td className="px-4 py-2 font-medium text-slate-800 dark:text-slate-200">RAM</td><td className="px-4 py-2">16 GB</td></tr>
+                  <tr><td className="px-4 py-2 font-medium text-slate-800 dark:text-slate-200">Graphics</td><td className="px-4 py-2">AMD Radeon Graphics</td></tr>
+                  <tr><td className="px-4 py-2 font-medium text-slate-800 dark:text-slate-200">Storage</td><td className="px-4 py-2">477 GB</td></tr>
+                  <tr><td className="px-4 py-2 font-medium text-slate-800 dark:text-slate-200">OS</td><td className="px-4 py-2">Windows 11</td></tr>
+                </tbody>
+              </table>
             </div>
-            <div className="bg-slate-50 dark:bg-slate-800 p-5 rounded-lg border border-slate-100 dark:border-slate-700">
-              <h4 className="font-bold mb-3 text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700 pb-2">R Packages & Libraries</h4>
-              <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                <li><strong className="text-slate-700 dark:text-slate-300">Data Processing:</strong> dplyr, tidyr, readr</li>
-                <li><strong className="text-slate-700 dark:text-slate-300">Data Visualization:</strong> ggplot2, corrplot</li>
-                <li><strong className="text-slate-700 dark:text-slate-300">Statistical Analysis:</strong> R stats</li>
-                <li><strong className="text-slate-700 dark:text-slate-300">Machine Learning:</strong> caret, randomForest, rpart</li>
-              </ul>
-            </div>
-            <div className="bg-slate-50 dark:bg-slate-800 p-5 rounded-lg border border-slate-100 dark:border-slate-700">
-              <h4 className="font-bold mb-3 text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700 pb-2">Analytical Models</h4>
-              <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                <li><strong className="text-slate-700 dark:text-slate-300">Placement Prediction:</strong> Logistic Regression, Decision Tree, Random Forest</li>
-                <li><strong className="text-slate-700 dark:text-slate-300">Salary Analysis:</strong> Linear Regression</li>
-              </ul>
+
+            <div className="bg-slate-50 dark:bg-slate-800 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+              <h4 className="font-bold text-slate-800 dark:text-slate-200 p-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">SOFTWARE</h4>
+              <table className="w-full text-sm text-left text-slate-600 dark:text-slate-400">
+                <thead className="bg-slate-100 dark:bg-slate-800/50">
+                  <tr>
+                    <th className="px-4 py-3 font-semibold">Software</th>
+                    <th className="px-4 py-3 font-semibold">Technology</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+                  <tr><td className="px-4 py-2 font-medium text-slate-800 dark:text-slate-200">Programming</td><td className="px-4 py-2">R Programming</td></tr>
+                  <tr><td className="px-4 py-2 font-medium text-slate-800 dark:text-slate-200">IDE</td><td className="px-4 py-2">RStudio</td></tr>
+                  <tr><td className="px-4 py-2 font-medium text-slate-800 dark:text-slate-200">Data Processing</td><td className="px-4 py-2">readr, dplyr, tidyr</td></tr>
+                  <tr><td className="px-4 py-2 font-medium text-slate-800 dark:text-slate-200">Visualization</td><td className="px-4 py-2">ggplot2, corrplot</td></tr>
+                  <tr><td className="px-4 py-2 font-medium text-slate-800 dark:text-slate-200">Statistics</td><td className="px-4 py-2">stats</td></tr>
+                  <tr><td className="px-4 py-2 font-medium text-slate-800 dark:text-slate-200">Machine Learning</td><td className="px-4 py-2">caret, rpart, randomForest</td></tr>
+                  <tr><td className="px-4 py-2 font-medium text-slate-800 dark:text-slate-200">Regression</td><td className="px-4 py-2">Linear Regression</td></tr>
+                  <tr><td className="px-4 py-2 font-medium text-slate-800 dark:text-slate-200">Dataset</td><td className="px-4 py-2">Student Academic Placement Performance Dataset</td></tr>
+                  <tr><td className="px-4 py-2 font-medium text-slate-800 dark:text-slate-200">Dashboard</td><td className="px-4 py-2">Google AI Studio / React / TypeScript</td></tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </section>
@@ -101,33 +117,33 @@ export default function About() {
           </h3>
           <div className="space-y-6">
             <div className="border-l-4 border-indigo-500 pl-4 py-1">
-              <h4 className="font-bold text-lg text-slate-800 dark:text-slate-200">Module 1 – Student Data Management and Preprocessing</h4>
+              <h4 className="font-bold text-lg text-slate-800 dark:text-slate-200">1. Student Data Management and Preprocessing</h4>
               <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
-                Uses R concepts for CSV import, data inspection, missing-value detection, duplicate detection, data cleaning, data transformation, data type conversion, and feature preparation. Utilizes R functions and packages such as <code>read.csv()</code>, <code>readr</code>, <code>dplyr</code>, and <code>tidyr</code>.
+                Uses R concepts for CSV import, data inspection, missing-value detection, duplicate detection, data cleaning, data transformation, data type conversion, and feature preparation.
               </p>
             </div>
             <div className="border-l-4 border-emerald-500 pl-4 py-1">
-              <h4 className="font-bold text-lg text-slate-800 dark:text-slate-200">Module 2 – Exploratory Data Analysis</h4>
+              <h4 className="font-bold text-lg text-slate-800 dark:text-slate-200">2. Exploratory Data Analysis</h4>
               <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
-                Performs EDA using R. Includes statistical operations like <code>summary()</code>, <code>mean()</code>, <code>median()</code>, <code>sd()</code>, <code>min()</code>, <code>max()</code>, <code>quantile()</code>, and <code>table()</code>. Analyzes all dataset features including academic percentages, skill scores, internships, attendance, backlogs, placement status, and salary package.
+                Performs EDA using R. Includes statistical operations and analyzes all dataset features including academic percentages, skill scores, internships, attendance, backlogs, placement status, and salary package.
               </p>
             </div>
             <div className="border-l-4 border-sky-500 pl-4 py-1">
-              <h4 className="font-bold text-lg text-slate-800 dark:text-slate-200">Module 3 – Visualization and Placement Insights</h4>
+              <h4 className="font-bold text-lg text-slate-800 dark:text-slate-200">3. Visualization and Placement Insights</h4>
               <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
-                Uses R visualization techniques primarily via the <code>ggplot2</code> package. Creates bar charts, pie/donut charts, histograms, scatter plots, box plots, and correlation heatmaps to display relationships (e.g., CGPA vs Placement, Technical Skill vs Placement, Salary vs CGPA). The dashboard displays the results of these R-based analyses.
+                Uses R visualization techniques primarily via the <code>ggplot2</code> package. Creates bar charts, histograms, scatter plots, box plots, and correlation heatmaps to display relationships.
               </p>
             </div>
             <div className="border-l-4 border-amber-500 pl-4 py-1">
-              <h4 className="font-bold text-lg text-slate-800 dark:text-slate-200">Module 4 – Placement Prediction and Salary Analysis</h4>
+              <h4 className="font-bold text-lg text-slate-800 dark:text-slate-200">4. Placement Prediction and Salary Analysis</h4>
               <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
-                Uses R-based statistical and machine-learning methods (<code>stats</code>, <code>caret</code>, <code>rpart</code>, <code>randomForest</code>). Evaluates placement classification (Logistic Regression, Decision Tree, Random Forest) using Accuracy, Precision, Recall, F1 Score, and Confusion Matrix. Predicts Salary Package using Linear Regression evaluated via R², MAE, MSE, and RMSE.
+                Uses R-based statistical and machine-learning methods. Evaluates placement classification using Accuracy, Precision, Recall, F1 Score, and Confusion Matrix. Predicts Salary Package using Linear Regression evaluated via R², MAE, MSE, and RMSE.
               </p>
             </div>
             <div className="border-l-4 border-rose-500 pl-4 py-1">
-              <h4 className="font-bold text-lg text-slate-800 dark:text-slate-200">Module 5 – Placement Insights and Reporting</h4>
+              <h4 className="font-bold text-lg text-slate-800 dark:text-slate-200">5. Placement Insights and Reporting</h4>
               <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
-                Uses the results generated through R analysis to generate placement trends, important placement factors, academic/skill/internship/salary insights, model performance, and recommendations. The dashboard presents these results in a visually understandable form.
+                Uses the results generated through R analysis to generate placement trends, important placement factors, academic/skill/internship/salary insights, model performance, and recommendations.
               </p>
             </div>
           </div>
@@ -143,59 +159,34 @@ export default function About() {
 
           <div className="space-y-6">
             <div className="bg-slate-900 text-slate-200 rounded-xl overflow-hidden border border-slate-800">
-              <div className="bg-slate-950 px-4 py-2 text-xs text-slate-400 border-b border-slate-800 font-mono">1_data_preprocessing.R</div>
+              <div className="bg-slate-950 px-4 py-2 text-xs text-slate-400 border-b border-slate-800 font-mono">01_data_preprocessing.R & 02_eda.R</div>
               <pre className="p-4 text-sm overflow-x-auto"><code className="language-r">{`library(readr)
 library(dplyr)
 
-data <- read_csv("student_academic_placement_performance_dataset(1).csv")
+data <- read_csv(
+  "student_academic_placement_performance_dataset(1).csv"
+)
 
-# Dataset information
 dim(data)
+
 str(data)
+
 summary(data)
 
 colSums(is.na(data))
 
-# Average CGPA
 mean(data$cgpa, na.rm = TRUE)
 
-# Average technical skill
 mean(data$technical_skill_score, na.rm = TRUE)
 
-# Average soft skill
 mean(data$soft_skill_score, na.rm = TRUE)
 
-# Placement rate
-placement_rate <- mean(data$placement_status == 1, na.rm = TRUE) * 100
+placement_rate <- mean(
+  data$placement_status == 1,
+  na.rm = TRUE
+) * 100
+
 placement_rate`}</code></pre>
-            </div>
-
-            <div className="bg-slate-900 text-slate-200 rounded-xl overflow-hidden border border-slate-800">
-              <div className="bg-slate-950 px-4 py-2 text-xs text-slate-400 border-b border-slate-800 font-mono">2_visualization.R</div>
-              <pre className="p-4 text-sm overflow-x-auto"><code className="language-r">{`library(ggplot2)
-
-ggplot(data, aes(x = cgpa, fill = as.factor(placement_status))) +
-  geom_histogram(bins = 20) +
-  labs(
-    title = "CGPA Distribution by Placement Status",
-    x = "CGPA",
-    y = "Number of Students",
-    fill = "Placement Status"
-  )`}</code></pre>
-            </div>
-
-            <div className="bg-slate-900 text-slate-200 rounded-xl overflow-hidden border border-slate-800">
-              <div className="bg-slate-950 px-4 py-2 text-xs text-slate-400 border-b border-slate-800 font-mono">3_regression_analysis.R</div>
-              <pre className="p-4 text-sm overflow-x-auto"><code className="language-r">{`model <- lm(
-  salary_package_lpa ~ cgpa +
-  technical_skill_score +
-  soft_skill_score +
-  internship_count +
-  work_experience_months,
-  data = subset(data, placement_status == 1 & salary_package_lpa > 0)
-)
-
-summary(model)`}</code></pre>
             </div>
           </div>
         </section>
