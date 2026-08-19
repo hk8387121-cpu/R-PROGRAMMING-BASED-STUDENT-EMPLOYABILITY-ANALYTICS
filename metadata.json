@@ -1,0 +1,6 @@
+{
+  "name": "Student Employability Analytics",
+  "description": "Student Employability Analytics and Placement Prediction using R Programming concepts implemented in TypeScript.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
