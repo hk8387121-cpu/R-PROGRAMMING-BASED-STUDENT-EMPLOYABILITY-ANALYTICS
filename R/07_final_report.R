@@ -2,137 +2,93 @@
 library(readr)
 library(dplyr)
 
-cat("Generating dynamic final analytical report...\n")
+cat("Generating dynamic final report...\n")
 
-# Safely read tables, with fallback if not executed
-read_table_safe <- function(path) {
-  if (file.exists(path)) {
-    return(read_csv(path, show_col_types = FALSE))
-  }
+safe_read <- function(path) {
+  if (file.exists(path)) return(read_csv(path, show_col_types = FALSE))
   return(NULL)
 }
 
-df_dataset <- read_table_safe("../results/tables/cleaned_dataset.csv")
-df_desc <- read_table_safe("../results/tables/descriptive_statistics.csv")
-df_place <- read_table_safe("../results/tables/placement_statistics.csv")
-df_models <- read_table_safe("../results/tables/model_comparison.csv")
-df_best <- read_table_safe("../results/tables/best_model.csv")
-df_salary <- read_table_safe("../results/tables/salary_regression_metrics.csv")
+df_dataset <- safe_read("../results/tables/cleaned_dataset.csv")
+df_desc <- safe_read("../results/tables/descriptive_statistics.csv")
+df_place <- safe_read("../results/tables/placement_statistics.csv")
+df_cor <- safe_read("../results/tables/correlation_matrix.csv")
+df_metrics <- safe_read("../results/tables/classification_metrics.csv")
+df_comp <- safe_read("../results/tables/model_comparison.csv")
+df_best <- safe_read("../results/tables/best_model.csv")
+df_salary <- safe_read("../results/tables/salary_regression_metrics.csv")
 
-report_content <- c(
-  "==================================================",
-  " FINAL ANALYTICAL REPORT",
-  "==================================================",
-  ""
-)
+out <- c()
+out <- c(out, "==================================================",
+              " FINAL ANALYTICAL REPORT",
+              "==================================================")
 
-# 1. Dataset Summary
-report_content <- c(report_content, "1. Dataset Summary", "--------------------------------------------------")
+# 1. Project Overview
+out <- c(out, "", "1. Project Overview", "-------------------", "This project evaluates student placement probabilities and salary regression using a machine learning pipeline.")
+
+# 2. Dataset Summary
+out <- c(out, "", "2. Dataset Summary", "------------------")
 if (!is.null(df_dataset)) {
-  report_content <- c(report_content, paste("Total Records:", nrow(df_dataset)))
-  report_content <- c(report_content, paste("Total Features:", ncol(df_dataset)))
-} else {
-  report_content <- c(report_content, "Dataset not found.")
-}
-report_content <- c(report_content, "")
+  out <- c(out, paste("Total Records:", nrow(df_dataset)))
+  out <- c(out, paste("Total Features:", ncol(df_dataset)))
+} else { out <- c(out, "Data not available.") }
 
-# 2. Placement Summary
-report_content <- c(report_content, "2. Placement Summary", "--------------------------------------------------")
+# 3. Placement Summary
+out <- c(out, "", "3. Placement Summary", "--------------------")
 if (!is.null(df_dataset) && "placement_status" %in% names(df_dataset)) {
   total <- nrow(df_dataset)
   placed <- sum(df_dataset$placement_status == "Placed", na.rm = TRUE)
-  rate <- round((placed / total) * 100, 2)
-  report_content <- c(report_content, paste("Placed Students:", placed))
-  report_content <- c(report_content, paste("Not Placed Students:", total - placed))
-  report_content <- c(report_content, paste("Overall Placement Rate:", rate, "%"))
-} else {
-  report_content <- c(report_content, "Placement summary not available.")
-}
-report_content <- c(report_content, "")
+  rate <- round((placed/total)*100, 2)
+  out <- c(out, paste("Overall Placement Rate:", rate, "%"))
+} else { out <- c(out, "Data not available.") }
 
-# 3. Descriptive Statistics
-report_content <- c(report_content, "3. Descriptive Statistics", "--------------------------------------------------")
+# 4. Descriptive Statistics
+out <- c(out, "", "4. Descriptive Statistics", "-------------------------")
 if (!is.null(df_desc)) {
   cgpa_mean <- round(df_desc$Mean[df_desc$Feature == "cgpa"], 2)
   tech_mean <- round(df_desc$Mean[df_desc$Feature == "technical_skill_score"], 2)
-  report_content <- c(report_content, paste("Average CGPA:", cgpa_mean))
-  report_content <- c(report_content, paste("Average Technical Skill Score:", tech_mean))
-} else {
-  report_content <- c(report_content, "Descriptive statistics not available.")
-}
-report_content <- c(report_content, "")
+  out <- c(out, paste("Average CGPA across all students:", cgpa_mean))
+  out <- c(out, paste("Average Technical Skill Score:", tech_mean))
+} else { out <- c(out, "Data not available.") }
 
-# 4. Placed vs Not Placed comparison
-report_content <- c(report_content, "4. Placed vs Not Placed comparison", "--------------------------------------------------")
-if (!is.null(df_place)) {
-  placed_row <- df_place %>% filter(placement_status == "Placed")
-  not_placed_row <- df_place %>% filter(placement_status == "Not Placed")
-  
-  if(nrow(placed_row) > 0 && nrow(not_placed_row) > 0) {
-    report_content <- c(report_content, paste("Placed Average CGPA:", round(placed_row$avg_cgpa, 2), 
-                                              "| Not Placed Average CGPA:", round(not_placed_row$avg_cgpa, 2)))
-    report_content <- c(report_content, paste("Placed Average Tech Skill:", round(placed_row$avg_tech_skill, 2), 
-                                              "| Not Placed Average Tech Skill:", round(not_placed_row$avg_tech_skill, 2)))
+# 5. Placement Model Comparison
+out <- c(out, "", "5. Placement Model Comparison", "-----------------------------")
+if (!is.null(df_comp)) {
+  for (i in 1:nrow(df_comp)) {
+    out <- c(out, sprintf("%d. %s (F1: %.4f, Bal. Acc: %.4f)", df_comp$Rank[i], df_comp$Model[i], df_comp$F1_Score[i], df_comp$Balanced_Accuracy[i]))
   }
-} else {
-  report_content <- c(report_content, "Comparison statistics not available.")
-}
-report_content <- c(report_content, "")
+} else { out <- c(out, "Data not available.") }
 
-# 5. Model Comparison
-report_content <- c(report_content, "5. Model Comparison", "--------------------------------------------------")
-if (!is.null(df_models)) {
-  for (i in 1:nrow(df_models)) {
-    report_content <- c(report_content, paste0(
-      df_models$Rank[i], ". ", df_models$Model[i], 
-      " (F1: ", round(df_models$F1_Score[i], 4), 
-      ", Bal. Acc: ", round(df_models$Balanced_Accuracy[i], 4), ")"
-    ))
-  }
-} else {
-  report_content <- c(report_content, "Model comparison data not available.")
-}
-report_content <- c(report_content, "")
-
-# 6. Best Model
-report_content <- c(report_content, "6. Best Model", "--------------------------------------------------")
+# 6. Best Placement Model
+out <- c(out, "", "6. Best Placement Model", "-----------------------")
 if (!is.null(df_best)) {
-  b_mod <- df_best$Best_Model[1]
-  b_f1 <- round(df_best$Best_F1_Score[1], 4)
-  report_content <- c(report_content, paste("The best-performing placement model based on F1 Score was", b_mod, "with an F1 Score of", b_f1, "."))
-} else {
-  report_content <- c(report_content, "Best model data not available.")
-}
-report_content <- c(report_content, "")
+  out <- c(out, sprintf("The best-performing placement model based on F1 Score was %s, with an F1 Score of %.4f.", df_best$Best_Model[1], df_best$Best_F1_Score[1]))
+} else { out <- c(out, "Data not available.") }
 
 # 7. Salary Regression Results
-report_content <- c(report_content, "7. Salary Regression Results", "--------------------------------------------------")
+out <- c(out, "", "7. Salary Regression Results", "----------------------------")
 if (!is.null(df_salary)) {
   rsq <- df_salary$Value[df_salary$Metric == "R_Squared"]
-  report_content <- c(report_content, paste("The salary regression achieved an R² of", round(rsq, 4), "on the test set."))
-} else {
-  report_content <- c(report_content, "Salary regression data not available.")
-}
-report_content <- c(report_content, "")
+  rmse <- df_salary$Value[df_salary$Metric == "RMSE"]
+  out <- c(out, sprintf("The salary regression model achieved an R-squared value of %.4f and an RMSE of %.4f.", rsq, rmse))
+} else { out <- c(out, "Data not available.") }
 
 # 8. Key Findings
-report_content <- c(report_content, "8. Key Findings", "--------------------------------------------------")
-report_content <- c(report_content, "Statistical association does not necessarily imply causation.")
-report_content <- c(report_content, "- The machine learning classification pipeline successfully evaluated multiple student attributes.")
-report_content <- c(report_content, "- Academic performance and technical proficiencies show differing average levels between placed and non-placed groups.")
-report_content <- c(report_content, "- Regression analysis indicates the degree to which continuous features explain variance in the salary package.")
-report_content <- c(report_content, "")
+out <- c(out, "", "8. Key Findings", "---------------")
+out <- c(out, "Statistical association does not necessarily imply causation.")
+if (!is.null(df_place)) {
+  placed_cgpa <- round(df_place$avg_cgpa[df_place$placement_status == "Placed"], 2)
+  not_placed_cgpa <- round(df_place$avg_cgpa[df_place$placement_status == "Not Placed"], 2)
+  out <- c(out, sprintf("Placed students had an average CGPA of %.2f compared to %.2f for non-placed students.", placed_cgpa, not_placed_cgpa))
+}
 
 # 9. Recommendations
-report_content <- c(report_content, "9. Recommendations", "--------------------------------------------------")
-report_content <- c(report_content, "- Educators and administrators can utilize these statistical patterns to identify areas for student skill development.")
-report_content <- c(report_content, "- Students can focus on the specific attributes (such as maintaining strong academic records and gaining practical experience) that the predictive models identified as highly relevant.")
-report_content <- c(report_content, "")
+out <- c(out, "", "9. Recommendations", "------------------")
+out <- c(out, "Focus on improving attributes that statistical associations and predictive models identify as highly relevant to successful placements.")
 
 # 10. Conclusion
-report_content <- c(report_content, "10. Conclusion", "--------------------------------------------------")
-report_content <- c(report_content, "The analytical workflow effectively processed the dataset, extracted quantitative insights, and evaluated predictive models. These data-driven techniques provide a robust framework for understanding and estimating student placement outcomes.")
-report_content <- c(report_content, "")
+out <- c(out, "", "10. Conclusion", "--------------")
+out <- c(out, "The analytical workflow effectively processed the dataset, dynamically ranked predictive models based on pure metrics, and generated a statistical overview of placement factors.")
 
-writeLines(report_content, "../results/final_report_summary.txt")
-cat("Dynamic report generated successfully and saved to results/final_report_summary.txt.\n")
+writeLines(out, "../results/final_report_summary.txt")
+cat("Dynamic report saved to results/final_report_summary.txt\n")

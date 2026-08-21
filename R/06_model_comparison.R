@@ -7,46 +7,37 @@ metrics_file <- "../results/tables/classification_metrics.csv"
 if (file.exists(metrics_file)) {
   metrics <- read_csv(metrics_file, show_col_types = FALSE)
   
-  # 1. Validate that all three models exist
-  required_models <- c("Logistic Regression", "Decision Tree", "Random Forest")
-  missing_models <- setdiff(required_models, metrics$Model)
-  
-  if (length(missing_models) > 0) {
-    cat("Warning: The following required models are missing:", paste(missing_models, collapse = ", "), "\n")
+  # Validate required models
+  req_models <- c("Logistic Regression", "Decision Tree", "Random Forest")
+  missing <- setdiff(req_models, metrics$Model)
+  if(length(missing) > 0) {
+    cat("Warning: Missing models:", paste(missing, collapse=", "), "\n")
   }
   
-  # 2. Sort models by F1 Score descending, then Balanced Accuracy descending
+  # Rank models dynamically based on real metrics
   metrics_sorted <- metrics %>%
     arrange(desc(F1_Score), desc(Balanced_Accuracy)) %>%
-    mutate(Rank = row_number())
+    mutate(Rank = row_number()) %>%
+    select(Model, Accuracy, Precision, Recall, F1_Score, Balanced_Accuracy, ROC_AUC, Rank)
   
-  # 3 & 4. Identify the best model
-  best_model_row <- metrics_sorted[1, ]
-  
-  best_model_name <- best_model_row$Model
-  best_f1 <- best_model_row$F1_Score
-  best_bal_acc <- best_model_row$Balanced_Accuracy
-  
-  # 5. Create results/tables/model_comparison.csv
+  # Write model_comparison
   write_csv(metrics_sorted, "../results/tables/model_comparison.csv")
   
-  # 6. Create results/tables/best_model.csv
-  best_model_df <- data.frame(
-    Best_Model = best_model_name,
+  # Determine and extract the best model dynamically
+  best <- metrics_sorted[1, ]
+  best_df <- data.frame(
+    Best_Model = best$Model,
     Selection_Metric = "F1_Score (Secondary: Balanced_Accuracy)",
-    Best_F1_Score = best_f1,
-    Best_Balanced_Accuracy = best_bal_acc,
+    Best_F1_Score = best$F1_Score,
+    Best_Balanced_Accuracy = best$Balanced_Accuracy,
+    Best_ROC_AUC = best$ROC_AUC,
     stringsAsFactors = FALSE
   )
-  write_csv(best_model_df, "../results/tables/best_model.csv")
+  write_csv(best_df, "../results/tables/best_model.csv")
   
-  # 7. Print the best model to the console
-  cat("--- Model Comparison ---\n")
-  print(metrics_sorted)
-  cat("\nBest Model Selected:", best_model_name, "with F1 Score =", best_f1, "\n")
-  cat("Model comparison table saved to results/tables/model_comparison.csv\n")
-  cat("Best model details saved to results/tables/best_model.csv\n")
-  
+  # Print the dynamic best model to the console
+  cat(sprintf("Best Model based on F1 Score: %s\n", best$Model))
+  cat("Model comparison generated and saved to results/tables/model_comparison.csv\n")
 } else {
-  cat("Error: classification_metrics.csv not found. Run 04_placement_prediction.R first.\n")
+  cat("Error: classification_metrics.csv not found.\n")
 }
