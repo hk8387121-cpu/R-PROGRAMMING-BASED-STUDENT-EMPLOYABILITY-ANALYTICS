@@ -11,13 +11,14 @@ data <- read_csv("../results/tables/cleaned_dataset.csv")
 
 # Ensure target is a factor
 data$placement_status <- as.factor(data$placement_status)
+data$extracurricular_activities <- as.factor(data$extracurricular_activities)
 
 # Select features
 features <- data %>% select(
   ssc_percentage, hsc_percentage, degree_percentage, cgpa,
   entrance_exam_score, technical_skill_score, soft_skill_score,
   internship_count, live_projects, work_experience_months,
-  certifications, attendance_percentage, backlogs, placement_status
+  certifications, attendance_percentage, backlogs, extracurricular_activities, placement_status
 )
 
 # Train-Test Split (80/20 Stratified)
