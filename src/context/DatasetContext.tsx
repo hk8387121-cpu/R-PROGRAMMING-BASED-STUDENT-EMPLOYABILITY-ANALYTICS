@@ -34,7 +34,7 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
     const loadDefaultDataset = async () => {
       try {
         setIsLoadingDefault(true);
-        const response = await fetch('/student_academic_placement_performance_dataset(1).csv');
+        const response = await fetch(`${import.meta.env.BASE_URL}student_academic_placement_performance_dataset(1).csv`);
         if (!response.ok) {
           throw new Error('Failed to fetch the default dataset.');
         }
