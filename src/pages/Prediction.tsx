@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrainCircuit, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 
-// Recreated Prediction.tsx to fix the mangled TSX tags while removing extracurricular
+
 
 export default function Prediction() {
   const [formData, setFormData] = useState({

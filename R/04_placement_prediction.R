@@ -1,4 +1,6 @@
+# ============================================================
 # 04_placement_prediction.R
+# ============================================================
 
 library(readr)
 library(caret)
@@ -7,7 +9,7 @@ library(randomForest)
 library(dplyr)
 library(pROC)
 
-data <- read_csv("../results/tables/cleaned_dataset.csv")
+data <- read_csv("../results/tables/cleaned_dataset.csv", show_col_types = FALSE)
 
 # Ensure target is a factor
 data$placement_status <- as.factor(data$placement_status)
@@ -22,8 +24,8 @@ features <- data %>% select(
 
 # Train-Test Split (80/20 Stratified)
 set.seed(42)
-trainIndex <- createDataPartition(features$placement_status, p = .8, 
-                                  list = FALSE, 
+trainIndex <- createDataPartition(features$placement_status, p = .8,
+                                  list = FALSE,
                                   times = 1)
 dataTrain <- features[ trainIndex,]
 dataTest  <- features[-trainIndex,]
@@ -52,7 +54,12 @@ add_metrics <- function(model_name, cm, actual, probs) {
   f1 <- cm$byClass["F1"]
   bal_acc <- cm$byClass["Balanced Accuracy"]
   
-  roc_obj <- roc(as.numeric(actual), probs)
+  roc_obj <- roc(
+    response = actual,
+    predictor = probs,
+    levels = c("Not Placed", "Placed"),
+    direction = "<"
+  )
   auc_val <- as.numeric(auc(roc_obj))
   
   metrics_list <<- rbind(metrics_list, data.frame(
@@ -88,10 +95,11 @@ rf_preds <- predict(rf_model, newdata = dataTest)
 rf_cm <- confusionMatrix(rf_preds, dataTest$placement_status, positive = "Placed")
 add_metrics("Random Forest", rf_cm, dataTest$placement_status, rf_probs)
 
+dir.create("../results/models", showWarnings = FALSE, recursive = TRUE)
 saveRDS(rf_model, "../results/models/random_forest_model.rds")
 saveRDS(log_model, "../results/models/logistic_regression_model.rds")
 saveRDS(dt_model, "../results/models/decision_tree_model.rds")
 
 # Save classification metrics
 write_csv(metrics_list, "../results/tables/classification_metrics.csv")
-cat("\nMetrics saved to results/tables/classification_metrics.csv\n")
+cat("\nMetrics saved to ../results/tables/classification_metrics.csv\n")

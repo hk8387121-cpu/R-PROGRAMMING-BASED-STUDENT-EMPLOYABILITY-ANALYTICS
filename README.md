@@ -20,13 +20,13 @@ Students possess varying levels of academic performance, technical skills, soft 
 - **Context:** The dataset is used as the single source of truth for all analyses.
 
 ## 5. Dataset Attributes
-- `student_id`: Unique identifier
-- `gender`: Student's gender
-- `ssc_percentage`: Secondary School Certificate percentage
-- `hsc_percentage`: Higher Secondary Certificate percentage
+
+- `student_id`: Unique identifier for each student
+- `ssc_percentage`: Secondary School Certificate (10th) percentage
+- `hsc_percentage`: Higher Secondary Certificate (12th) percentage
 - `degree_percentage`: Undergraduate degree percentage
-- `cgpa`: Cumulative Grade Point Average
 - `entrance_exam_score`: Score in entrance examinations
+- `cgpa`: Cumulative Grade Point Average
 - `technical_skill_score`: Quantified technical proficiency
 - `soft_skill_score`: Quantified soft skills proficiency
 - `internship_count`: Number of internships completed
@@ -35,7 +35,6 @@ Students possess varying levels of academic performance, technical skills, soft 
 - `certifications`: Number of certifications earned
 - `attendance_percentage`: Academic attendance record
 - `backlogs`: Number of academic backlogs
-- `extracurricular_activities`: Participation in extracurriculars
 - `placement_status`: Target Variable (Placed / Not Placed)
 - `salary_package_lpa`: Target Variable for regression (Lakhs Per Annum)
 
@@ -141,6 +140,7 @@ The Linear Regression model (`lm()`) is trained exclusively on the subset of stu
 ```
 
 ## 16. Project Structure
+
 ```text
 R-PROGRAMMING-BASED-STUDENT-EMPLOYABILITY-ANALYTICS/
 │
@@ -161,21 +161,37 @@ R-PROGRAMMING-BASED-STUDENT-EMPLOYABILITY-ANALYTICS/
 ├── results/
 │   │
 │   ├── figures/
+│   │   ├── ssc_distribution.png
+│   │   ├── hsc_distribution.png
+│   │   ├── degree_distribution.png
+│   │   ├── cgpa_distribution.png
+│   │   ├── entrance_exam_distribution.png
+│   │   ├── technical_skill_distribution.png
+│   │   ├── soft_skill_distribution.png
+│   │   ├── internship_distribution.png
+│   │   ├── live_projects_distribution.png
+│   │   ├── work_experience_distribution.png
+│   │   ├── certifications_distribution.png
+│   │   ├── attendance_distribution.png
+│   │   ├── backlog_distribution.png
 │   │   ├── placement_distribution.png
-│   │   ├── academic_performance.png
-│   │   ├── skill_analysis.png
-│   │   ├── cgpa_placement.png
-│   │   ├── internship_placement.png
-│   │   ├── attendance_placement.png
-│   │   ├── backlog_placement.png
 │   │   ├── salary_distribution.png
+│   │   ├── placement_rate_cgpa.png
+│   │   ├── placement_rate_internships.png
+│   │   ├── placement_rate_technical_skill.png
+│   │   ├── placement_rate_soft_skill.png
+│   │   ├── placement_rate_attendance.png
+│   │   ├── placement_rate_backlogs.png
+│   │   ├── placement_rate_projects.png
+│   │   ├── placement_rate_experience.png
+│   │   ├── placement_rate_certifications.png
 │   │   └── correlation_heatmap.png
 │   │
 │   ├── tables/
+│   │   ├── cleaned_dataset.csv
 │   │   ├── descriptive_statistics.csv
 │   │   ├── placement_statistics.csv
 │   │   ├── correlation_matrix.csv
-│   │   ├── model_comparison.csv
 │   │   ├── classification_metrics.csv
 │   │   └── salary_regression_metrics.csv
 │   │
@@ -186,8 +202,7 @@ R-PROGRAMMING-BASED-STUDENT-EMPLOYABILITY-ANALYTICS/
 │       └── salary_regression_model.rds
 │
 ├── src/
-│   │
-...
+│   │...
 ```
 
 ## 17. RStudio Setup
@@ -214,9 +229,9 @@ R-PROGRAMMING-BASED-STUDENT-EMPLOYABILITY-ANALYTICS/
 5. Open your browser and navigate to the local URL (usually `http://localhost:3000`).
 
 ## 19. Results
-- **Key Determinants:** High CGPA, strong technical skills, and 2+ internships consistently increase placement probability. Academic backlogs have a severe negative impact.
-- **Models:** Random Forest provided the highest accuracy, while Logistic Regression served as an interpretable baseline.
-- **Salary:** Linear Regression results demonstrated that skill factors can statistically influence starting packages.
+
+- **Dynamic Evaluation**: Results are generated dynamically by scripts `01` through `07`.
+- **Note**: Statistical association does not necessarily imply causation.
 
 ## 20. Future Scope
 - **Advanced Ensembles:** Implement XGBoost or Neural Networks for improved F1 scores on the minority class (Placed).
