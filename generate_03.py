@@ -1,3 +1,6 @@
+import re
+
+content = """
 # ============================================================
 # 03_visualization.R
 # Student Employability Analytics and Placement Prediction
@@ -39,6 +42,7 @@ dir.create(
 # ------------------------------------------------------------
 
 save_plot <- function(filename, plot_obj) {
+  
   ggsave(
     filename = paste0("../results/figures/", filename),
     plot = plot_obj,
@@ -119,9 +123,6 @@ plot_pr(pr_proj, "grp", "Placement Rate by Live Projects", "placement_rate_proje
 pr_exp <- data %>% filter(!is.na(work_experience_months)) %>% mutate(grp = cut(work_experience_months, breaks = 4, include.lowest = TRUE)) %>% group_by(grp) %>% summarise(Placement_Rate = mean(placement_status == "Placed", na.rm = TRUE) * 100, .groups = "drop")
 plot_pr(pr_exp, "grp", "Placement Rate by Work Experience", "placement_rate_experience.png")
 
-pr_cert <- data %>% filter(!is.na(certifications)) %>% mutate(grp = case_when(certifications == 0 ~ "0", certifications == 1 ~ "1", certifications == 2 ~ "2", certifications >= 3 ~ "3+", TRUE ~ NA_character_)) %>% filter(!is.na(grp)) %>% mutate(grp = factor(grp, levels = c("0", "1", "2", "3+"))) %>% group_by(grp) %>% summarise(Placement_Rate = mean(placement_status == "Placed", na.rm = TRUE) * 100, .groups = "drop")
-plot_pr(pr_cert, "grp", "Placement Rate by Certifications", "placement_rate_certifications.png")
-
 # ============================================================
 # E. CORRELATION ANALYSIS
 # ============================================================
@@ -171,7 +172,11 @@ cat("VISUALIZATION ANALYSIS COMPLETED SUCCESSFULLY\n")
 cat("====================================================\n")
 cat("Total records used:", nrow(data), "\n")
 cat("Total variables:", ncol(data), "\n")
-cat("25 visualizations generated.\n")
+cat("24 visualizations generated.\n")
 cat("All figures saved to: results/figures/\n")
 cat("Correlation matrix saved to: results/tables/\n")
 cat("====================================================\n")
+"""
+
+with open("R/03_visualization.R", "w") as f:
+    f.write(content)
