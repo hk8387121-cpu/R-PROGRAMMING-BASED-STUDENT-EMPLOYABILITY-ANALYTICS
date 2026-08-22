@@ -58,7 +58,7 @@ CSV Dataset → R Programming → Data Preprocessing → EDA → Statistical Ana
 ## 9. Algorithms
 - **Logistic Regression**: For baseline placement prediction (`glm` with `family = binomial`).
 - **Decision Tree**: For interpretable placement rules (`rpart`).
-- **Random Forest**: For high-accuracy placement prediction (`randomForest`).
+- **Random Forest**: Ensemble-based placement classification model.
 - **Linear Regression**: For continuous salary estimation (`lm`).
 
 ## 10. Model Evaluation
