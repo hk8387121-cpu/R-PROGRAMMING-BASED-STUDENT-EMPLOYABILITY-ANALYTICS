@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { DatasetProvider } from './context/DatasetContext';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
@@ -20,7 +20,7 @@ import About from './pages/About';
 export default function App() {
   return (
     <DatasetProvider>
-      <HashRouter>
+      <BrowserRouter basename={(import.meta as any).env.BASE_URL}>
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<Dashboard />} />
@@ -35,7 +35,7 @@ export default function App() {
             <Route path="about" element={<About />} />
           </Route>
         </Routes>
-      </HashRouter>
+      </BrowserRouter>
     </DatasetProvider>
   );
 }
