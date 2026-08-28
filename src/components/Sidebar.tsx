@@ -7,7 +7,6 @@ import {
   Briefcase, 
   BrainCircuit, 
   IndianRupee, 
-  UserSquare2, 
   FileText, 
   Info,
   GraduationCap
@@ -22,7 +21,6 @@ const navItems = [
   { path: '/placement-insights', label: 'Placement Insights', icon: Briefcase },
   { path: '/prediction', label: 'Model Prediction', icon: BrainCircuit },
   { path: '/salary', label: 'Salary Analysis', icon: IndianRupee },
-  { path: '/student', label: 'Student Search', icon: UserSquare2 },
   { path: '/reports', label: 'Export Reports', icon: FileText },
   { path: '/about', label: 'About Project', icon: Info },
 ];
