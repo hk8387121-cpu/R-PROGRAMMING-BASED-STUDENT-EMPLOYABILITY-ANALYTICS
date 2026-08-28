@@ -37,7 +37,7 @@ export default function EDA() {
     };
   }, [processedDataset, mappedCols, stats]);
 
-  const getDistribution = (colName: string | undefined, bins: number = 10) => {
+  const getDistribution = (colName: string | undefined, bins: number = 10, separator: string = '-') => {
     if (!colName) return [];
     let min = Infinity, max = -Infinity;
     const values: number[] = [];
@@ -56,7 +56,7 @@ export default function EDA() {
 
     const step = (max - min) / bins;
     const data = Array(bins).fill(0).map((_, i) => ({
-      range: `${(min + i * step).toFixed(1)}-${(min + (i + 1) * step).toFixed(1)}`,
+      range: `${(min + i * step).toFixed(1)}${separator}${(min + (i + 1) * step).toFixed(1)}`,
       count: 0,
       minVal: min + i * step,
       maxVal: min + (i + 1) * step
@@ -113,7 +113,7 @@ export default function EDA() {
 
         <ChartCard title="Internships Distribution">
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={getDistribution(mappedCols.internships, 5)}>
+            <BarChart data={getDistribution(mappedCols.internships, 5, '–')}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="range" tick={{fontSize: 12}} />
               <YAxis />
