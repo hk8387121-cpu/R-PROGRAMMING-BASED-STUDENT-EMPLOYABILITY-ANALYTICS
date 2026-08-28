@@ -1,371 +1,123 @@
 import React, { useMemo } from 'react';
+import { AlertCircle, BarChart3, CheckCircle2, Code2, GraduationCap, IndianRupee, Users, XCircle } from 'lucide-react';
+import { BarChart, Bar, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useDataset } from '../context/DatasetContext';
-import { getMappedColumns, parseNumber, isPlaced } from '../utils/dataProcessing';
-import { 
-  Users, CheckCircle2, XCircle, TrendingUp, 
-  GraduationCap, Code2, MessagesSquare, IndianRupee 
-} from 'lucide-react';
-import { 
-  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ScatterChart, Scatter
-} from 'recharts';
+import { getMappedColumns, isPlaced, parseNumber } from '../utils/dataProcessing';
 
-const COLORS = ['#4f46e5', '#ef4444', '#10b981', '#f59e0b', '#3b82f6', '#8b5cf6'];
+const COLORS = ['#4f46e5', '#ef4444'];
+const MODEL_KEYS = ['ssc', 'hsc', 'degree', 'cgpa', 'entranceExam', 'technicalSkill', 'softSkill', 'internships', 'liveProjects', 'workExperience', 'certifications', 'attendance', 'backlogs'] as const;
 
 export default function Dashboard() {
-  const { processedDataset, columns, rawDataset, isLoadingDefault, loadError } = useDataset();
+  const { processedDataset, rawDataset, columns, stats, isLoadingDefault, loadError } = useDataset();
+  const mapped = useMemo(() => getMappedColumns(columns), [columns]);
 
-  const mappedCols = useMemo(() => getMappedColumns(columns), [columns]);
-
-  const kpis = useMemo(() => {
-    let placed = 0;
-    let notPlaced = 0;
-    let cgpaSum = 0;
-    let cgpaCount = 0;
-    let techSum = 0;
-    let techCount = 0;
-    let techMin = Infinity, techMax = -Infinity;
-    let softSum = 0;
-    let softCount = 0;
-    let softMin = Infinity, softMax = -Infinity;
-    let salarySum = 0;
-    let salaryCount = 0;
-    let internSum = 0;
-    let internCount = 0;
-    let backlogs = 0;
-
+  const analysis = useMemo(() => {
+    let placed = 0, notPlaced = 0, salaryCount = 0, salarySum = 0, backlogSum = 0;
+    let cgpaSum = 0, cgpaCount = 0, techSum = 0, techCount = 0, softSum = 0, softCount = 0;
+    let modelRecords = 0;
     processedDataset.forEach(row => {
-      if (mappedCols.placementStatus) {
-        if (isPlaced(row[mappedCols.placementStatus])) placed++;
-        else notPlaced++;
-      }
-      
-      if (mappedCols.cgpa) {
-        const v = parseNumber(row[mappedCols.cgpa]);
-        if (!isNaN(v)) { cgpaSum += v; cgpaCount++; }
-      }
-      
-      if (mappedCols.technicalSkill) {
-        const v = parseNumber(row[mappedCols.technicalSkill]);
-        if (!isNaN(v)) { 
-          techSum += v; techCount++; 
-          if (v < techMin) techMin = v;
-          if (v > techMax) techMax = v;
-        }
-      }
-      
-      if (mappedCols.softSkill) {
-        const v = parseNumber(row[mappedCols.softSkill]);
-        if (!isNaN(v)) { 
-          softSum += v; softCount++; 
-          if (v < softMin) softMin = v;
-          if (v > softMax) softMax = v;
-        }
-      }
-      
-      if (mappedCols.salary) {
-        const v = parseNumber(row[mappedCols.salary]);
-        if (!isNaN(v) && v > 0) { salarySum += v; salaryCount++; }
-      }
-      
-      if (mappedCols.internships) {
-        const v = parseNumber(row[mappedCols.internships]);
-        if (!isNaN(v)) { internSum += v; internCount++; }
-      }
-      
-      if (mappedCols.backlogs) {
-        const v = parseNumber(row[mappedCols.backlogs]);
-        if (!isNaN(v) && v > 0) { backlogs += v; }
-      }
+      const p = mapped.placementStatus ? isPlaced(row[mapped.placementStatus]) : false;
+      if (mapped.placementStatus) p ? placed++ : notPlaced++;
+      const salary = mapped.salary ? parseNumber(row[mapped.salary]) : NaN;
+      if (p && Number.isFinite(salary) && salary > 0) { salaryCount++; salarySum += salary; }
+      const backlog = mapped.backlogs ? parseNumber(row[mapped.backlogs]) : NaN;
+      if (Number.isFinite(backlog)) backlogSum += backlog;
+      const cgpa = mapped.cgpa ? parseNumber(row[mapped.cgpa]) : NaN;
+      if (Number.isFinite(cgpa)) { cgpaSum += cgpa; cgpaCount++; }
+      const tech = mapped.technicalSkill ? parseNumber(row[mapped.technicalSkill]) : NaN;
+      if (Number.isFinite(tech)) { techSum += tech; techCount++; }
+      const soft = mapped.softSkill ? parseNumber(row[mapped.softSkill]) : NaN;
+      if (Number.isFinite(soft)) { softSum += soft; softCount++; }
+      const complete = mapped.placementStatus && MODEL_KEYS.every(k => {
+        const col = mapped[k as keyof typeof mapped];
+        return Boolean(col) && Number.isFinite(parseNumber(row[col as string]));
+      });
+      if (complete) modelRecords++;
     });
-
+    const totalPlacement = placed + notPlaced;
     return {
       total: processedDataset.length,
-      placed,
-      notPlaced,
-      placementRate: placed / (placed + notPlaced) * 100 || 0,
+      placed, notPlaced,
+      placementRate: totalPlacement ? placed / totalPlacement * 100 : 0,
+      avgSalary: salaryCount ? salarySum / salaryCount : 0,
+      salaryCount,
+      backlogSum,
       avgCgpa: cgpaCount ? cgpaSum / cgpaCount : 0,
       avgTech: techCount ? techSum / techCount : 0,
-      techMin: techMin === Infinity ? 0 : techMin,
-      techMax: techMax === -Infinity ? 0 : techMax,
       avgSoft: softCount ? softSum / softCount : 0,
-      softMin: softMin === Infinity ? 0 : softMin,
-      softMax: softMax === -Infinity ? 0 : softMax,
-      avgSalary: salaryCount ? salarySum / salaryCount : 0,
-      avgInterns: internCount ? internSum / internCount : 0,
-      backlogs
+      modelRecords
     };
-  }, [processedDataset, mappedCols]);
+  }, [processedDataset, mapped]);
 
-  const placementData = [
-    { name: 'Placed', value: kpis.placed },
-    { name: 'Not Placed', value: kpis.notPlaced }
-  ];
+  const placementData = [{ name: 'Placed', value: analysis.placed }, { name: 'Not Placed', value: analysis.notPlaced }];
 
-  const academicData = useMemo(() => {
-    let sscSum = 0, hscSum = 0, degSum = 0;
-    let count = processedDataset.length;
-    
-    processedDataset.forEach(r => {
-      if (mappedCols.ssc) sscSum += parseNumber(r[mappedCols.ssc]) || 0;
-      if (mappedCols.hsc) hscSum += parseNumber(r[mappedCols.hsc]) || 0;
-      if (mappedCols.degree) degSum += parseNumber(r[mappedCols.degree]) || 0;
-    });
-
-    return [
-      { name: 'SSC %', value: count ? sscSum / count : 0 },
-      { name: 'HSC %', value: count ? hscSum / count : 0 },
-      { name: 'Degree %', value: count ? degSum / count : 0 },
-    ];
-  }, [processedDataset, mappedCols]);
-
-  const skillData = [
-    { name: 'Technical Skills', value: kpis.avgTech },
-    { name: 'Soft Skills', value: kpis.avgSoft }
-  ];
-
-  const cgpaBins = useMemo(() => {
-    if (!mappedCols.cgpa || !mappedCols.placementStatus) return [];
-    
-    // Create bins for CGPA
+  const cgpaData = useMemo(() => {
+    if (!mapped.cgpa || !mapped.placementStatus) return [];
     const bins = [
-      { name: '<6.0', min: 0, max: 6.0, placed: 0, total: 0 },
-      { name: '6.0-6.5', min: 6.0, max: 6.5, placed: 0, total: 0 },
-      { name: '6.5-7.0', min: 6.5, max: 7.0, placed: 0, total: 0 },
-      { name: '7.0-7.5', min: 7.0, max: 7.5, placed: 0, total: 0 },
-      { name: '7.5-8.0', min: 7.5, max: 8.0, placed: 0, total: 0 },
-      { name: '8.0-8.5', min: 8.0, max: 8.5, placed: 0, total: 0 },
-      { name: '8.5-9.0', min: 8.5, max: 9.0, placed: 0, total: 0 },
-      { name: '>9.0', min: 9.0, max: 10.1, placed: 0, total: 0 }
+      { name: '<6.0', min: 0, max: 6, placed: 0, total: 0 },
+      { name: '6.0–6.5', min: 6, max: 6.5, placed: 0, total: 0 },
+      { name: '6.5–7.0', min: 6.5, max: 7, placed: 0, total: 0 },
+      { name: '7.0–7.5', min: 7, max: 7.5, placed: 0, total: 0 },
+      { name: '7.5–8.0', min: 7.5, max: 8, placed: 0, total: 0 },
+      { name: '8.0–8.5', min: 8, max: 8.5, placed: 0, total: 0 },
+      { name: '8.5–9.0', min: 8.5, max: 9, placed: 0, total: 0 },
+      { name: '>9.0', min: 9, max: 11, placed: 0, total: 0 }
     ];
-
-    processedDataset.forEach(r => {
-      const cgpa = parseNumber(r[mappedCols.cgpa!]);
-      const is_placed = isPlaced(r[mappedCols.placementStatus!]);
-      if (!isNaN(cgpa)) {
-        for (const bin of bins) {
-          if (cgpa >= bin.min && cgpa < bin.max) {
-            bin.total++;
-            if (is_placed) bin.placed++;
-            break;
-          }
-        }
-      }
+    processedDataset.forEach(row => {
+      const value = parseNumber(row[mapped.cgpa!]);
+      if (!Number.isFinite(value)) return;
+      const bin = bins.find(b => value >= b.min && value < b.max);
+      if (bin) { bin.total++; if (isPlaced(row[mapped.placementStatus!])) bin.placed++; }
     });
+    return bins.map(b => ({ name: b.name, rate: b.total ? +(b.placed / b.total * 100).toFixed(2) : 0, total: b.total }));
+  }, [processedDataset, mapped]);
 
-    return bins.map(bin => ({
-      name: bin.name,
-      rate: bin.total > 0 ? (bin.placed / bin.total) * 100 : 0,
-      total: bin.total
-    }));
-  }, [processedDataset, mappedCols]);
+  const missingTotal = useMemo(() => Object.values(stats?.missingValues || {}).reduce((a, b) => a + b, 0), [stats]);
 
-  if (isLoadingDefault && !rawDataset.length) {
-    return (
-      <div className="flex items-center justify-center h-96 text-slate-500 flex-col gap-4">
-        <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-        <p>Loading default dataset...</p>
-      </div>
-    );
-  }
-
-  if (!rawDataset.length) {
-    return (
-      <div className="flex flex-col items-center justify-center h-96 text-slate-500 space-y-4">
-        <p>Please upload a dataset to view the dashboard.</p>
-        {loadError && (
-          <p className="text-red-500 text-sm">Failed to load default dataset: {loadError}</p>
-        )}
-      </div>
-    );
-  }
+  if (isLoadingDefault && !rawDataset.length) return <div className="flex items-center justify-center h-96 text-slate-500">Loading default dataset...</div>;
+  if (!rawDataset.length) return <div className="flex flex-col items-center justify-center h-96 text-slate-500 gap-2"><p>Unable to load the default dataset.</p>{loadError && <p className="text-red-500 text-sm">{loadError}</p>}</div>;
 
   return (
-    <div className="h-full flex flex-col min-h-0 space-y-4 pb-12 overflow-y-auto">
-      {/* Dataset Status Panel */}
-      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm flex flex-col gap-4">
-        <div>
-          <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Dataset Integrity Status</h3>
-          <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Source: Student Academic Placement Performance Dataset</p>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 text-sm">
-          <div className="bg-white dark:bg-slate-900 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col">
-            <span className="text-xs text-slate-500 mb-1">CSV Records Loaded</span> 
-            <span className="font-bold text-indigo-600 dark:text-indigo-400">{rawDataset.length.toLocaleString()}</span>
-          </div>
-          <div className="bg-white dark:bg-slate-900 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col">
-            <span className="text-xs text-slate-500 mb-1">Application Records</span> 
-            <span className="font-bold text-indigo-600 dark:text-indigo-400">{processedDataset.length.toLocaleString()}</span>
-          </div>
-          <div className="bg-white dark:bg-slate-900 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col">
-            <span className="text-xs text-slate-500 mb-1">Valid Records</span> 
-            <span className="font-bold text-indigo-600 dark:text-indigo-400">{processedDataset.length.toLocaleString()}</span>
-          </div>
-          <div className="bg-white dark:bg-slate-900 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col">
-            <span className="text-xs text-slate-500 mb-1">Dashboard Records</span> 
-            <span className="font-bold text-emerald-600 dark:text-emerald-400">{processedDataset.length.toLocaleString()}</span>
-          </div>
-          <div className="bg-white dark:bg-slate-900 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col">
-            <span className="text-xs text-slate-500 mb-1">EDA Records</span> 
-            <span className="font-bold text-emerald-600 dark:text-emerald-400">{processedDataset.length.toLocaleString()}</span>
-          </div>
-          <div className="bg-white dark:bg-slate-900 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col">
-            <span className="text-xs text-slate-500 mb-1">Model Records</span> 
-            <span className="font-bold text-purple-600 dark:text-purple-400">{processedDataset.length.toLocaleString()}</span>
-          </div>
-          <div className="bg-white dark:bg-slate-900 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col">
-            <span className="text-xs text-slate-500 mb-1">Salary Records</span> 
-            <span className="font-bold text-amber-600 dark:text-amber-400">{kpis.placed.toLocaleString()}</span>
-          </div>
-          <div className="bg-white dark:bg-slate-900 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col">
-            <span className="text-xs text-slate-500 mb-1">Missing Values</span> 
-            <span className="font-bold text-slate-600 dark:text-slate-400">0</span>
-          </div>
-          <div className="bg-white dark:bg-slate-900 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col">
-            <span className="text-xs text-slate-500 mb-1">Duplicate Records</span> 
-            <span className="font-bold text-slate-600 dark:text-slate-400">0</span>
-          </div>
+    <div className="space-y-5 pb-12 overflow-y-auto h-full">
+      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+        <div className="flex items-start justify-between gap-4 mb-4"><div><h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Dataset Integrity Status</h3><p className="text-sm font-medium text-slate-700 dark:text-slate-300 mt-1">Source: Student Academic Placement Performance Dataset</p></div><div className="text-xs text-slate-500">Live values from loaded CSV</div></div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 text-sm">
+          <Integrity label="CSV Records Loaded" value={rawDataset.length} />
+          <Integrity label="Application Records" value={processedDataset.length} />
+          <Integrity label="Valid Model Records" value={analysis.modelRecords} />
+          <Integrity label="Salary Records" value={analysis.salaryCount} />
+          <Integrity label="Missing Values" value={missingTotal} />
+          <Integrity label="Duplicate Records" value={stats?.duplicateCount ?? 0} />
+          <Integrity label="Features" value={columns.length} />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 grid-rows-none md:grid-rows-[repeat(12,minmax(0,1fr))] gap-4 flex-1 min-h-[800px] auto-rows-min">
-        {/* Bento Grid Top Row KPIs */}
-        <div className="col-span-12 md:col-span-6 lg:col-span-3 row-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col justify-between shadow-sm">
-          <span className="text-[11px] font-semibold text-slate-500 uppercase">Total Students</span>
-          <div className="flex items-end justify-between">
-            <div className="text-2xl font-bold text-slate-900 dark:text-white">{kpis.total.toLocaleString()}</div>
-            <div className="text-[10px] text-green-600 bg-green-50 dark:bg-green-900/30 px-1.5 py-0.5 rounded">Dataset Loaded</div>
-          </div>
-        </div>
-        <div className="col-span-12 md:col-span-6 lg:col-span-3 row-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col justify-between shadow-sm">
-          <span className="text-[11px] font-semibold text-slate-500 uppercase">Placement Rate</span>
-          <div className="flex items-end justify-between">
-            <div className="text-2xl font-bold text-slate-900 dark:text-white">{kpis.placementRate.toFixed(1)}%</div>
-            <div className="text-[10px] text-slate-400">N = {kpis.placed.toLocaleString()}</div>
-          </div>
-        </div>
-        <div className="col-span-12 md:col-span-6 lg:col-span-3 row-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col justify-between shadow-sm">
-          <span className="text-[11px] font-semibold text-slate-500 uppercase">Avg Package</span>
-          <div className="flex items-end justify-between">
-            <div className="text-2xl font-bold text-slate-900 dark:text-white">{kpis.avgSalary.toFixed(2)} <span className="text-xs font-normal text-slate-400">LPA</span></div>
-          </div>
-        </div>
-        <div className="col-span-12 md:col-span-6 lg:col-span-3 row-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col justify-between shadow-sm">
-          <span className="text-[11px] font-semibold text-slate-500 uppercase">Total Backlogs</span>
-          <div className="flex items-end justify-between">
-            <div className="text-2xl font-bold text-red-600">{kpis.backlogs.toLocaleString()}</div>
-            <div className="text-[10px] text-red-400">Needs Review</div>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Kpi icon={<Users className="w-5 h-5" />} label="Total Students" value={analysis.total.toLocaleString()} />
+        <Kpi icon={<CheckCircle2 className="w-5 h-5" />} label="Placement Rate" value={`${analysis.placementRate.toFixed(1)}%`} note={`${analysis.placed.toLocaleString()} placed`} />
+        <Kpi icon={<IndianRupee className="w-5 h-5" />} label="Average Salary" value={`${analysis.avgSalary.toFixed(2)} LPA`} note={`${analysis.salaryCount.toLocaleString()} valid salaries`} />
+        <Kpi icon={<XCircle className="w-5 h-5" />} label="Total Backlogs" value={analysis.backlogSum.toLocaleString()} note="Sum of reported backlogs" />
+      </div>
 
-        {/* Bento Grid Middle Section */}
-        <div className="col-span-12 lg:col-span-8 row-span-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex flex-col shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase">Placement Rate by CGPA Range</h3>
-            <div className="flex gap-2">
-              <span className="flex items-center gap-1 text-[10px] text-slate-500"><span className="w-2 h-2 rounded-full bg-indigo-500"></span> Placement Rate (%)</span>
-            </div>
-          </div>
-          <div className="flex-1 relative w-full h-full min-h-[200px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={cgpaBins} margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.2} />
-                <XAxis dataKey="name" tick={{fontSize: 10}} />
-                <YAxis domain={[0, 100]} tick={{fontSize: 10}} />
-                <Tooltip cursor={{fill: 'transparent'}} formatter={(value: number) => [`${value.toFixed(1)}%`, 'Placement Rate']} />
-                <Bar dataKey="rate" fill={COLORS[0]} radius={[4, 4, 0, 0]} barSize={40} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <section className="lg:col-span-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+          <h3 className="text-xs font-bold uppercase text-slate-600 dark:text-slate-300 mb-4">Placement Distribution</h3>
+          <ResponsiveContainer width="100%" height={270}><PieChart><Pie data={placementData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={65} outerRadius={100} paddingAngle={3}>{placementData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}</Pie><Tooltip /><Legend /></PieChart></ResponsiveContainer>
+        </section>
+        <section className="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-4"><h3 className="text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Placement Rate by CGPA Range</h3><span className="text-xs text-slate-500">Observed rate</span></div>
+          <ResponsiveContainer width="100%" height={270}><BarChart data={cgpaData}><CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.25} /><XAxis dataKey="name" tick={{fontSize: 10}} interval={0} /><YAxis domain={[0, 100]} tick={{fontSize: 10}} /><Tooltip formatter={(v: number) => [`${v}%`, 'Placement rate']} /><Bar dataKey="rate" fill="#4f46e5" radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer>
+        </section>
+      </div>
 
-        <div className="col-span-12 lg:col-span-4 row-span-4 bg-slate-900 dark:bg-slate-950 border border-slate-800 rounded-2xl p-5 text-white shadow-sm flex flex-col">
-          <h3 className="text-xs font-bold uppercase mb-4 text-indigo-400">Predictive Insights</h3>
-          <ul className="space-y-4 flex-1 overflow-y-auto">
-            <li className="flex gap-3">
-              <div className="w-6 h-6 rounded bg-green-500/20 text-green-400 flex items-center justify-center shrink-0">
-                <CheckCircle2 className="w-4 h-4" />
-              </div>
-              <div className="text-[11px] leading-snug text-slate-300">Students with <span className="text-white font-bold">CGPA &gt; 7.5</span> have significantly higher placement rates.</div>
-            </li>
-            <li className="flex gap-3">
-              <div className="w-6 h-6 rounded bg-yellow-500/20 text-yellow-400 flex items-center justify-center shrink-0">
-                <XCircle className="w-4 h-4" />
-              </div>
-              <div className="text-[11px] leading-snug text-slate-300"><span className="text-white font-bold">Backlogs</span> significantly drop placement probability.</div>
-            </li>
-            <li className="flex gap-3">
-              <div className="w-6 h-6 rounded bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0">
-                <TrendingUp className="w-4 h-4" />
-              </div>
-              <div className="text-[11px] leading-snug text-slate-300">Each <span className="text-white font-bold">Internship</span> increases predicted salary average.</div>
-            </li>
-          </ul>
-        </div>
-
-        {/* Bento Grid Bottom Section */}
-        <div className="col-span-12 lg:col-span-4 row-span-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex flex-col shadow-sm">
-          <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase mb-3">Live Skill Matrix</h3>
-          <div className="flex-1 space-y-4">
-            <div className="space-y-1">
-              <div className="flex justify-between text-[10px] uppercase font-bold text-slate-400"><span>Technical Proficiency</span><span>{kpis.avgTech.toFixed(0)}%</span></div>
-              <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden"><div className="h-full bg-indigo-500" style={{width: `${kpis.avgTech}%`}}></div></div>
-              <div className="flex justify-between text-[9px] text-slate-400 mt-0.5"><span>Min: {kpis.techMin.toFixed(0)}</span><span>Max: {kpis.techMax.toFixed(0)}</span></div>
-            </div>
-            <div className="space-y-1">
-              <div className="flex justify-between text-[10px] uppercase font-bold text-slate-400"><span>Soft Skills Score</span><span>{kpis.avgSoft.toFixed(0)}%</span></div>
-              <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden"><div className="h-full bg-sky-400" style={{width: `${kpis.avgSoft}%`}}></div></div>
-              <div className="flex justify-between text-[9px] text-slate-400 mt-0.5"><span>Min: {kpis.softMin.toFixed(0)}</span><span>Max: {kpis.softMax.toFixed(0)}</span></div>
-            </div>
-            
-            <div className="mt-6 p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl">
-              <div className="text-[10px] font-bold text-slate-500 uppercase mb-2">Averages</div>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="text-center p-2 bg-white dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-700">
-                  <div className="text-xs font-bold text-indigo-600 dark:text-indigo-400">{kpis.avgCgpa.toFixed(2)}</div>
-                  <div className="text-[8px] text-slate-400 uppercase">CGPA Mean</div>
-                </div>
-                <div className="text-center p-2 bg-white dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-700">
-                  <div className="text-xs font-bold text-indigo-600 dark:text-indigo-400">{kpis.avgInterns.toFixed(1)}</div>
-                  <div className="text-[8px] text-slate-400 uppercase">Internships</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-span-12 lg:col-span-4 row-span-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm flex flex-col">
-          <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase mb-4">Placement Overview</h3>
-          <div className="flex-1 w-full min-h-[150px]">
-             <ResponsiveContainer width="100%" height="100%">
-               <PieChart>
-                 <Pie data={placementData} cx="50%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={5} dataKey="value">
-                   {placementData.map((entry, index) => (
-                     <Cell key={`cell-${index}`} fill={index === 0 ? COLORS[0] : COLORS[1]} />
-                   ))}
-                 </Pie>
-                 <Tooltip />
-                 <Legend wrapperStyle={{fontSize: '10px'}} />
-               </PieChart>
-             </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="col-span-12 lg:col-span-4 row-span-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm flex flex-col">
-          <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase mb-4">Academic Averages</h3>
-          <div className="flex-1 w-full min-h-[150px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={academicData} margin={{ top: 10, right: 10, bottom: 0, left: -20 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.2} />
-                <XAxis dataKey="name" tick={{fontSize: 10}} />
-                <YAxis domain={[0, 100]} tick={{fontSize: 10}} />
-                <Tooltip cursor={{fill: 'transparent'}} />
-                <Bar dataKey="value" fill={COLORS[4]} radius={[4, 4, 0, 0]} barSize={30} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm"><h3 className="text-xs font-bold uppercase text-slate-600 dark:text-slate-300 mb-5 flex items-center gap-2"><GraduationCap className="w-4 h-4" /> Academic & Skill Snapshot</h3><div className="grid grid-cols-3 gap-4"><Snapshot label="Average CGPA" value={analysis.avgCgpa.toFixed(2)} /><Snapshot label="Technical Skill" value={analysis.avgTech.toFixed(1)} /><Snapshot label="Soft Skill" value={analysis.avgSoft.toFixed(1)} /></div></section>
+        <section className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm"><h3 className="text-xs font-bold uppercase text-slate-600 dark:text-slate-300 mb-4 flex items-center gap-2"><BarChart3 className="w-4 h-4" /> Reviewer Notes</h3><div className="space-y-3 text-sm text-slate-600 dark:text-slate-300"><p className="flex gap-2"><CheckCircle2 className="w-4 h-4 mt-0.5 text-emerald-500 shrink-0" /> All dashboard counts are calculated from the loaded dataset.</p><p className="flex gap-2"><Code2 className="w-4 h-4 mt-0.5 text-indigo-500 shrink-0" /> R scripts in <code>R/</code> remain the authoritative analytical pipeline.</p><p className="flex gap-2"><AlertCircle className="w-4 h-4 mt-0.5 text-amber-500 shrink-0" /> Observed associations are descriptive and should not be interpreted as causal effects.</p></div></section>
       </div>
     </div>
   );
 }
+
+function Integrity({ label, value }: { label: string; value: number }) { return <div className="bg-white dark:bg-slate-900 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col"><span className="text-xs text-slate-500 mb-1">{label}</span><span className="font-bold text-indigo-600 dark:text-indigo-400">{value.toLocaleString()}</span></div>; }
+function Kpi({ icon, label, value, note }: { icon: React.ReactNode; label: string; value: string; note?: string }) { return <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm"><div className="flex items-center gap-2 text-slate-500 text-xs uppercase font-semibold">{icon}{label}</div><div className="text-2xl font-bold mt-5 text-slate-900 dark:text-white">{value}</div>{note && <div className="text-xs text-slate-500 mt-1">{note}</div>}</div>; }
+function Snapshot({ label, value }: { label: string; value: string }) { return <div className="rounded-xl bg-slate-50 dark:bg-slate-800 p-4 text-center"><div className="text-xs text-slate-500 mb-1">{label}</div><div className="text-xl font-bold text-indigo-600 dark:text-indigo-400">{value}</div></div>; }
