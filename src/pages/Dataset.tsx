@@ -3,6 +3,7 @@ import Papa from 'papaparse';
 import { UploadCloud, Search, AlertCircle, FileSpreadsheet } from 'lucide-react';
 import { useDataset } from '../context/DatasetContext';
 import { StudentRecord } from '../types/student';
+import StudentAnalysis from './StudentAnalysis';
 
 export default function Dataset() {
   const { rawDataset, processedDataset, columns, stats, setDataset } = useDataset();
@@ -19,8 +20,6 @@ export default function Dataset() {
       parseFile(file);
     }
   };
-
-  // ... (keep Drag handlers the same)
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -75,7 +74,7 @@ export default function Dataset() {
   const paginatedData = filteredData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Dataset</h2>
         {rawDataset.length > 0 && (
@@ -160,7 +159,10 @@ export default function Dataset() {
                   type="text" 
                   placeholder="Search records..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setPage(1);
+                  }}
                   className="pl-9 pr-4 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-64 transition-all"
                 />
               </div>
@@ -191,7 +193,11 @@ export default function Dataset() {
               </table>
             </div>
             <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 flex flex-wrap justify-between items-center gap-2">
-              <span>Showing {(page - 1) * rowsPerPage + 1} to {Math.min(page * rowsPerPage, filteredData.length)} of {filteredData.length} records</span>
+              <span>
+                {filteredData.length === 0
+                  ? 'No matching records'
+                  : `Showing ${(page - 1) * rowsPerPage + 1} to ${Math.min(page * rowsPerPage, filteredData.length)} of ${filteredData.length} records`}
+              </span>
               
               <div className="flex gap-2 items-center">
                 <button 
@@ -199,7 +205,7 @@ export default function Dataset() {
                   onClick={() => setPage(p => p - 1)}
                   className="px-2 py-1 rounded bg-slate-200 dark:bg-slate-700 disabled:opacity-50"
                 >Prev</button>
-                <span className="font-medium">Page {page} of {totalPages}</span>
+                <span className="font-medium">Page {totalPages === 0 ? 0 : page} of {totalPages}</span>
                 <button 
                   disabled={page === totalPages || totalPages === 0}
                   onClick={() => setPage(p => p + 1)}
@@ -213,6 +219,14 @@ export default function Dataset() {
               </label>
             </div>
           </div>
+
+          <section className="pt-2">
+            <div className="mb-4">
+              <h3 className="text-xl font-bold">Student Search</h3>
+              <p className="text-sm text-slate-500 mt-1">Search and analyze a student directly from the loaded dataset.</p>
+            </div>
+            <StudentAnalysis />
+          </section>
         </div>
       )}
     </div>
