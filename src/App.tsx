@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { DatasetProvider } from './context/DatasetContext';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
@@ -24,6 +24,7 @@ export default function App() {
           <Route path="/" element={<Layout />}>
             <Route index element={<Dashboard />} />
             <Route path="dataset" element={<Dataset />} />
+            <Route path="student" element={<Navigate to="/dataset" replace />} />
             <Route path="preprocessing" element={<Preprocessing />} />
             <Route path="exploratory" element={<EDA />} />
             <Route path="placement-insights" element={<PlacementInsights />} />
@@ -31,6 +32,7 @@ export default function App() {
             <Route path="salary" element={<SalaryAnalysis />} />
             <Route path="reports" element={<Reports />} />
             <Route path="about" element={<About />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
       </HashRouter>
