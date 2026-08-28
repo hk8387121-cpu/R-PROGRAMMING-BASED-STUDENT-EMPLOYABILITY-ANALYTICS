@@ -13,7 +13,6 @@ import EDA from './pages/EDA';
 import PlacementInsights from './pages/PlacementInsights';
 import Prediction from './pages/Prediction';
 import SalaryAnalysis from './pages/SalaryAnalysis';
-import StudentAnalysis from './pages/StudentAnalysis';
 import Reports from './pages/Reports';
 import About from './pages/About';
 
@@ -30,7 +29,6 @@ export default function App() {
             <Route path="placement-insights" element={<PlacementInsights />} />
             <Route path="prediction" element={<Prediction />} />
             <Route path="salary" element={<SalaryAnalysis />} />
-            <Route path="student" element={<StudentAnalysis />} />
             <Route path="reports" element={<Reports />} />
             <Route path="about" element={<About />} />
           </Route>
